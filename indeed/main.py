@@ -6,15 +6,11 @@ class Indeed():
     """
     Indeed client
     """
-    FORMAT = ("xml", "json")
+    TIMEOUT = 5
+    FORMAT_RESULTS = ("xml", "json")
     SORT = ("relevance", "date")
-    RADIUS = 25
     SITE_TYPE = ("jobsite", "employer")
     JOB_TYPE = ("fulltime", "parttime", "contract", "internship", "temporary")
-    START = 10
-    LIMIT = 25
-    FROMAGE = 0
-    HIGHLIGHT = 0
     COUNTRIES = {"United states": "us",
                  "Argentina": "ar",
                  "Australia": "au",
@@ -72,46 +68,67 @@ class Indeed():
 
     def __init__(self, publisher, version=2):
         """
-        Initialize Indeed with publisher ID
+        Initialize Indeed with publisher ID and version of API
+        :publisher - Publisher ID.
+                     To get the Publisher ID you need to register
+                     Publisher account - http://www.indeed.com/publisher
+                     and go to page https://ads.indeed.com/jobroll/xmlfeed
+                     to find there a string like:
+
+                     Your publisher ID is "12345678901234567890".
+
+                     12345678901234567890 is your Publisher ID
+        :version - Version. Which version of the API you wish to use.
+                   All publishers should be using version 2.
+                   Currently available versions are 1 and 2.
+
         """
         self.publisher = publisher
         self.version = version
+        self.format_results = "json"
         self.url = "http://api.indeed.com/ads/apisearch?publisher={publisher}"\
                    "&v={version}"\
-                   "&format={format}"\
+                   "&format={format_results}"\
                    "&callback={callback}"\
                    "&q={query}"\
                    "&l={location}"\
                    "&sort={sort}"\
                    "&radius={radius}"\
-                   "&st={st}"\
-                   "&jt={jt}"\
+                   "&st={site_type}"\
+                   "&jt={job_type}"\
                    "&start={start}"\
                    "&limit={limit}"\
                    "&fromage={fromage}"\
                    "&highlight={highlight}"\
-                   "&filter={filter}"\
+                   "&filter={filter_results}"\
                    "&latlong={latlong}"\
                    "&co={country}"\
-                   "&chnl={channel}"\
+                   "&chnl={chnl}"\
                    "&userip={userip}"\
                    "&useragent={useragent}"
+        self.response = ""
 
-    def search_jobs(self, format="xml", callback="", query, location,
-                    state=None, ):
+    def search_jobs(self, query, format_results="xml", callback="",
+                    location="", state="", sort="", radius=25, site_type="",
+                    job_type="", start=10, limit=25, fromage="",
+                    highlight=True, filter_results=True,
+                    latlong="", country="", chnl="",
+                    userip="1.2.3.4",
+                    useragent="Mozilla/5.0 " +
+                              "(Macintosh; Intel Mac OS X 10_8_2)"):
         """
         Main search function
-        :format - "xml" and "json". Default - "xml"
+        :query - Query. By default terms are ANDed. To see what is possible,
+                 use http://www.indeed.com/advanced_search
+                 to perform a search and then
+                 check the url for the q value
+        :format_results - "xml" and "json". Default - "xml"
         :callback - Callback. The name of a javascript function to use as a
                     callback to which the results of the search are passed.
                     This only applies when format=json.
                     For security reasons,
                     the callback name is restricted letters,
                     numbers, and the underscore character.
-        :query - Query. By default terms are ANDed. To see what is possible,
-                 use http://www.indeed.com/advanced_search
-                 to perform a search and then
-                 check the url for the q value
         :location - Location. Use a postal code or a "city,
                  state/province/region" combination.
         :state - State code of some countries.
@@ -161,15 +178,14 @@ class Indeed():
                  http://en.wikipedia.org/wiki/ISO_3166-2:GB
 
                  United States - state
-
-
+                 http://en.wikipedia.org/wiki/ISO_3166-2:US
 
         :sort - Sort by relevance or date. Default is relevance
         :radius - Distance from search location ("as the crow flies").
                   Default is 25.
-        :st - Site type. To show only jobs from job board use "jobsite".
+        :site_type - Site type. To show only jobs from job board use "jobsite".
               For jobs from direct employer websites use "employer"
-        :jt - Job type. Allowed values: "fulltime",
+        :job_type - Job type. Allowed values: "fulltime",
               "parttime", "contract", "internship", "temporary"
         :start - Start results as this results returned per query.
                  Default is 10.
@@ -202,7 +218,33 @@ class Indeed():
                      "User-Agent" HTTP request header from the end-user.
                      This field is required.
         """
-
+        format_results = "xml" if format_results not in self.FORMAT_RESULTS\
+            else format_results
+        location = "{0}, {1}".format(location, state) if state else location
+        sort = "" if sort not in self.SORT else sort
+        site_type = "" if site_type not in self.SITE_TYPE else site_type
+        job_type = "" if job_type not in self.JOB_TYPE else job_type
+        highlight = +highlight
+        filter_results = +filter_results
+        country = self.COUNTRIES.get(country, "us")
+        url = self.url.format(version=self.version, publisher=self.publisher,
+                              format_results=format_results,
+                              callback=callback, query=query,
+                              location=location, sort=sort,
+                              radius=radius,
+                              site_type=site_type, job_type=job_type,
+                              start=start, limit=limit, fromage=fromage,
+                              highlight=highlight,
+                              filter_results=filter_results,
+                              latlong=latlong, country=country, chnl=chnl,
+                              userip=userip, useragent=useragent)
+        return requests.get(url, timeout=self.TIMEOUT)
+        '''
+        if format_results == "json":
+            self.response = requests.get(url, timeout=self.TIMEOUT).json()
+        else:
+            pass
+        '''
 
 
 def main():
