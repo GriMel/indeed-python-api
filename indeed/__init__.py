@@ -7,38 +7,33 @@ import requests
 from lxml import etree
 
 
-class Query():
+def construct_query(self, all_words="", exact_phraze="",
+                    at_least_one="", none="", title="",
+                    company=""):
     """
-    Class for constructing search query
+    Construct query from initialized words
     """
-    def __init__(self):
-        self.query = ""
-
-    def construct_query(self, all_words="", exact_phraze="",
-                        at_least_one="", none="", title="",
-                        company=""):
-        """
-        Construct query from initialized words
-        """
-        self.query += "+".join(filter(None, all_words.split(" ")))
-        if exact_phraze:
-            self.query += "\"{}\"".format(exact_phraze)
-        if at_least_one:
-            temp = list(filter(None, at_least_one.split(" ")))
-            if len(temp) > 1:
-                self.query += "({})".format("+".join(temp))
-            else:
-                self.query += "+" + temp[0]
-        if none:
-            temp = list(filter(None, none.split(" ")))
-            if len(temp) > 1:
-                self.query += "+-".format(temp)
-            else:
-                self.query += "+-" + temp[0]
-        if title:
-            self.query += "title:({})".format(title)
-        if company:
-            self.query += "company:({})".format(company)
+    query = ""
+    query += "+".join(filter(None, all_words.split(" ")))
+    if exact_phraze:
+        query += "\"{}\"".format(exact_phraze)
+    if at_least_one:
+        temp = list(filter(None, at_least_one.split(" ")))
+        if len(temp) > 1:
+            query += "({})".format("+".join(temp))
+        else:
+            query += "+" + temp[0]
+    if none:
+        temp = list(filter(None, none.split(" ")))
+        if len(temp) > 1:
+            query += "+-".format(temp)
+        else:
+            query += "+-" + temp[0]
+    if title:
+        query += "title:({})".format(title)
+    if company:
+        query += "company:({})".format(company)
+    return query
 
 
 class Element():
@@ -59,6 +54,21 @@ class Element():
         self.url = url
         self.expired = expired
         self.date_published = date_published
+
+    def __str__(self):
+        """
+        Show info of element
+        """
+        return
+        """
+        Title: {title},
+        Description: {description}
+        Company: {company}
+        Date: {date}, {date_published}
+        Location: {country}, {city}, {state}
+        Expired: {expired}
+        Link: {url}
+        """.format(**self.__dict__)
 
 
 class Indeed():
