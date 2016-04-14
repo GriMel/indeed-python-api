@@ -2,9 +2,43 @@
 #
 # Python Indeed API
 # Main information here https://ads.indeed.com/jobroll/xmlfeed
-# 
+#
 import requests
 from lxml import etree
+
+
+class Query():
+    """
+    Class for constructing search query
+    """
+    def __init__(self):
+        self.query = ""
+
+    def construct_query(self, all_words="", exact_phraze="",
+                        at_least_one="", none="", title="",
+                        company=""):
+        """
+        Construct query from initialized words
+        """
+        self.query += "+".join(filter(None, all_words.split(" ")))
+        if exact_phraze:
+            self.query += "\"{}\"".format(exact_phraze)
+        if at_least_one:
+            temp = list(filter(None, at_least_one.split(" ")))
+            if len(temp) > 1:
+                self.query += "({})".format("+".join(temp))
+            else:
+                self.query += "+" + temp[0]
+        if none:
+            temp = list(filter(None, none.split(" ")))
+            if len(temp) > 1:
+                self.query += "+-".format(temp)
+            else:
+                self.query += "+-" + temp[0]
+        if title:
+            self.query += "title:({})".format(title)
+        if company:
+            self.query += "company:({})".format(company)
 
 
 class Element():
@@ -305,6 +339,7 @@ class Indeed():
                                             source, date, description, url, expired,
                                             date_published))
         return response
+
 
 def main():
     """
