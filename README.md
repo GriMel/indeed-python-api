@@ -1,12 +1,12 @@
 Indeed-Python-API
 =================
 
-Simple API for [Indeed](http://indeed.com)
-To get a key:
-1. Register **Publisher** account [here](http://www.indeed.com/publisher).
-2. Go to your [XMLFeed](https://ads.indeed.com/jobroll/xmlfeed) page.
-3. Find here a string like **Your publisher ID is "1234567890123456789"**
-4. **12345678901234567890** is your key.
+Simple API for [Indeed](http://indeed.com)  
+To get a key:  
+1. Register **Publisher** account [here](http://www.indeed.com/publisher)  
+2. Go to your [XMLFeed](https://ads.indeed.com/jobroll/xmlfeed) page  
+3. Find here a string like **Your publisher ID is "1234567890123456789"**  
+4. **12345678901234567890** is your key  
 
 Simple query
 ```python
