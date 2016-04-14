@@ -1,5 +1,30 @@
 # -*- coding: utf-8 -*-
+#
+# Python Indeed API
+# Main information here https://ads.indeed.com/jobroll/xmlfeed
+# 
 import requests
+from lxml import etree
+
+
+class Element():
+    """
+    Every element of Indeed's response
+    """
+    def __init__(self, title, company, city, state,
+                 country, source, date, description, url,
+                 expired, date_published):
+        self.title = title
+        self.company = company
+        self.city = city
+        self.state = state
+        self.country = country
+        self.source = source
+        self.date = date
+        self.description = description
+        self.url = url
+        self.expired = expired
+        self.date_published = date_published
 
 
 class Indeed():
@@ -106,12 +131,12 @@ class Indeed():
                    "&chnl={chnl}"\
                    "&userip={userip}"\
                    "&useragent={useragent}"
-        self.response = ""
+        self.results = []
 
     def search_jobs(self, query, format_results="xml", callback="",
                     location="", state="", sort="", radius=25, site_type="",
                     job_type="", start=10, limit=25, fromage="",
-                    highlight=True, filter_results=True,
+                    highlight=False, filter_results=True,
                     latlong="", country="", chnl="",
                     userip="1.2.3.4",
                     useragent="Mozilla/5.0 " +
@@ -227,6 +252,8 @@ class Indeed():
         highlight = +highlight
         filter_results = +filter_results
         country = self.COUNTRIES.get(country, "us")
+        if self.results:
+            self.results = []
         url = self.url.format(version=self.version, publisher=self.publisher,
                               format_results=format_results,
                               callback=callback, query=query,
@@ -238,14 +265,46 @@ class Indeed():
                               filter_results=filter_results,
                               latlong=latlong, country=country, chnl=chnl,
                               userip=userip, useragent=useragent)
-        return requests.get(url, timeout=self.TIMEOUT)
-        '''
+        response = requests.get(url, timeout=self.TIMEOUT)
         if format_results == "json":
-            self.response = requests.get(url, timeout=self.TIMEOUT).json()
+            json_resp = response.json()['results']
+            for i in json_resp:
+                title = i['jobtitle']
+                company = i['company']
+                city = i['city']
+                state = i['state']
+                country = i['country']
+                source = i['source']
+                date = i['date']
+                description = i['snippet']
+                url = i['url']
+                expired = i['expired']
+                date_published = i['formattedRelativeTime']
+                self.results.append(Element(title, company, city, state,
+                                            country, source, date,
+                                            description, url, expired,
+                                            date_published))
         else:
-            pass
-        '''
+            xml_resp = etree.fromstring(response.content)
+            count_of_results = len(xml_resp.findall(".//date"))
+            for i in range(count_of_results):
+                title = xml_resp.findall(".//jobtitle")[i].text
+                company = xml_resp.findall(".//company")[i].text
+                city = xml_resp.findall(".//city")[i].text
+                state = xml_resp.findall(".//state")[i].text
+                country = xml_resp.findall(".//country")[i].text
+                source = xml_resp.findall(".//source")[i].text
+                date = xml_resp.findall(".//date")[i].text
+                description = xml_resp.findall(".//snippet")[i].text
+                url = xml_resp.findall(".//url")[i].text
+                expired = False if xml_resp.findall(".//expired")[i].text == 'false' else\
+                    True
+                date_published = xml_resp.findall(".//formattedRelativeTime")[i].text
 
+                self.results.append(Element(title, company, city, state, country,
+                                            source, date, description, url, expired,
+                                            date_published))
+        return response
 
 def main():
     """
