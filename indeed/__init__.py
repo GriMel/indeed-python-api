@@ -12,6 +12,13 @@ def construct_query(self, all_words="", exact_phraze="",
                     company=""):
     """
     Construct query from initialized words
+    Sequence of parameters are given space-separated, e.g. "Python Django"
+    :all_words - look for all words in vacancies
+    :exact_phraze - look for exact phraze in vacancies
+    :at_least_one - look for at least one word in vacancies
+    :none - ignore vacancies with these words
+    :title - look for this words in title
+    :company - look for vacancies, posted by this company
     """
     query = ""
     query += "+".join(filter(None, all_words.split(" ")))
@@ -50,12 +57,12 @@ class Element():
         :city - city, where company is located
         :state - state (bundesland, province, territory)
         :country - country, where company is located
-        :source - site, where vacancy is posted (external site or indeed itself)
+        :source - site, where vacancy is posted (external or indeed itself)
         :date - date when vacancy was posted with GMT
         :description - short description of vacancy
         :url - link of vacancy
         :expired - True if vacancy is inactive, False otherwise
-        :date_published - date of vacancy publication, literally, e.g "2 days ago"
+        :date_published - date of vacancy publication in days, e.g "2 days ago"
         """
         self.title = title
         self.company = company
