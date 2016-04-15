@@ -43,6 +43,20 @@ class Element():
     def __init__(self, title, company, city, state,
                  country, source, date, description, url,
                  expired, date_published):
+        """
+        Initialize element
+        :title - title of vacancy
+        :company - name of company
+        :city - city, where company is located
+        :state - state (bundesland, province, territory)
+        :country - country, where company is located
+        :source - site, where vacancy is posted (external site or indeed itself)
+        :date - date when vacancy was posted with GMT
+        :description - short description of vacancy
+        :url - link of vacancy
+        :expired - True if vacancy is inactive, False otherwise
+        :date_published - date of vacancy publication, literally, e.g "2 days ago"
+        """
         self.title = title
         self.company = company
         self.city = city
@@ -55,11 +69,17 @@ class Element():
         self.expired = expired
         self.date_published = date_published
 
+    def __repr__(self):
+        """
+        Give information when using print (ind.results)
+        """
+        return self.title
+
     def __str__(self):
         """
         Show info of element
         """
-        return
+        row = \
         """
         Title: {title},
         Description: {description}
@@ -69,6 +89,7 @@ class Element():
         Expired: {expired}
         Link: {url}
         """.format(**self.__dict__)
+        return row
 
 
 class Indeed():
